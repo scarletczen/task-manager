@@ -46,7 +46,7 @@ func (s *TasksService) handleCreateTask(w http.ResponseWriter, r *http.Request) 
 	}
 
 	t, err := s.store.CreateTask(task)
-	
+
 	if err != nil {
 		WriteJSON(w, http.StatusInternalServerError, ErrorResponse{Error: "Error creating task"})
 		return
@@ -56,10 +56,21 @@ func (s *TasksService) handleCreateTask(w http.ResponseWriter, r *http.Request) 
 }
 
 func (s *TasksService) handleGetTask(w http.ResponseWriter, r *http.Request) {
-
+	vars := mux.Vars(r)
+	id := vars["id"]
+	if id == "" {
+		WriteJSON(w, http.StatusBadRequest, ErrorResponse{Error: "id is required"})
+		return
+	}
+	t, err := s.store.GetTask(id)
+	if err != nil {
+		WriteJSON(w, http.StatusInternalServerError, ErrorResponse{Error: "task not found"})
+		return
+	}
+	WriteJSON(w, http.StatusOK, t)
 }
 
-func validateTaskPayload(task *Task) error{
+func validateTaskPayload(task *Task) error {
 	if task.Name == "" {
 		return errNameRequired
 	}
