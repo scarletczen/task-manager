@@ -1,6 +1,10 @@
-package main
+package store
 
-import "database/sql"
+import (
+	"database/sql"
+
+	"github.com/abhinavthapa1998/task-manager/internal/types"
+)
 
 type Storage struct {
 	db *sql.DB
@@ -8,15 +12,15 @@ type Storage struct {
 
 type Store interface {
 	// Users
-	CreateUser(u *User) (*User, error)
-	GetUserById(id string) (*User, error)
+	CreateUser(u *types.User) (*types.User, error)
+	GetUserById(id string) (*types.User, error)
 	// Projects
-	CreateProject(p *Project) error
-	GetProject(id string) (*Project, error)
+	CreateProject(p *types.Project) error
+	GetProject(id string) (*types.Project, error)
 	DeleteProject(id string) error
 	// Tasks
-	CreateTask(t *Task) (*Task, error)
-	GetTask(id string) (*Task, error)
+	CreateTask(t *types.Task) (*types.Task, error)
+	GetTask(id string) (*types.Task, error)
 }
 
 func NewStore(db *sql.DB) *Storage {
@@ -25,13 +29,13 @@ func NewStore(db *sql.DB) *Storage {
 	}
 }
 
-func (s *Storage) CreateProject(p *Project) error {
+func (s *Storage) CreateProject(p *types.Project) error {
 	_, err := s.db.Exec("INSERT INTO projects (name) VALUES (?)", p.Name)
 	return err
 }
 
-func (s *Storage) GetProject(id string) (*Project, error) {
-	var p Project
+func (s *Storage) GetProject(id string) (*types.Project, error) {
+	var p types.Project
 	err := s.db.QueryRow("SELECT id, name, createdAt FROM projects WHERE id = ?", id).Scan(&p.Id, &p.Name, &p.CreatedAt)
 	return &p, err
 }
@@ -45,7 +49,7 @@ func (s *Storage) DeleteProject(id string) error {
 	return nil
 }
 
-func (s *Storage) CreateUser(u *User) (*User, error) {
+func (s *Storage) CreateUser(u *types.User) (*types.User, error) {
 	rows, err := s.db.Exec("INSERT INTO users (email, firstName, lastName, password) VALUES (?, ?, ?, ?)", u.Email, u.FirstName, u.LastName, u.Password)
 	if err != nil {
 		return nil, err
@@ -60,13 +64,13 @@ func (s *Storage) CreateUser(u *User) (*User, error) {
 	return u, nil
 }
 
-func (s *Storage) GetUserById(id string) (*User, error) {
-	var u User
+func (s *Storage) GetUserById(id string) (*types.User, error) {
+	var u types.User
 	err := s.db.QueryRow("SELECT id, email, firstName, lastName, createdAt FROM users WHERE id = ?", id).Scan(&u.Id, &u.Email, &u.FirstName, &u.LastName, &u.CreatedAt)
 	return &u, err
 }
 
-func (s *Storage) CreateTask(t *Task) (*Task, error) {
+func (s *Storage) CreateTask(t *types.Task) (*types.Task, error) {
 	rows, err := s.db.Exec("INSERT INTO tasks (name, status, project_id, assigned_to) VALUES (?, ?, ?, ?)", t.Name, t.Status, t.ProjectId, t.AssignedToId)
 
 	if err != nil {
@@ -82,8 +86,8 @@ func (s *Storage) CreateTask(t *Task) (*Task, error) {
 	return t, nil
 }
 
-func (s *Storage) GetTask(id string) (*Task, error) {
-	var t Task
+func (s *Storage) GetTask(id string) (*types.Task, error) {
+	var t types.Task
 	err := s.db.QueryRow("SELECT id, name, status, project_id, assigned_to, createdAt FROM tasks WHERE id = ?", id).Scan(&t.Id, &t.Name, &t.Status, &t.ProjectId, &t.AssignedToId, &t.CreatedAt)
 	return &t, err
 }

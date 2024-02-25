@@ -1,7 +1,9 @@
-package main
+package tests
 
 import (
 	"testing"
+
+	"github.com/abhinavthapa1998/task-manager/internal/services"
 )
 
 func TestCreateJWT(t *testing.T) {
@@ -9,7 +11,7 @@ func TestCreateJWT(t *testing.T) {
 
 	userID := int64(49)
 
-	token, err := CreateJWT(secret, userID)
+	token, err := services.CreateJWT(secret, userID)
 	if err != nil {
 		t.Errorf("error creating JWT: %v", err)
 	}
@@ -20,7 +22,7 @@ func TestCreateJWT(t *testing.T) {
 }
 
 func TestHashPassword(t *testing.T) {
-	hash, err := HashPassword("password")
+	hash, err := services.HashPassword("password")
 	if err != nil {
 		t.Errorf("error hashing password: %v", err)
 	}

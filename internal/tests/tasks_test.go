@@ -1,4 +1,4 @@
-package main
+package tests
 
 import (
 	"bytes"
@@ -7,15 +7,18 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/abhinavthapa1998/task-manager/internal/services"
+	"github.com/abhinavthapa1998/task-manager/internal/types"
+	"github.com/abhinavthapa1998/task-manager/internal/util"
 	"github.com/gorilla/mux"
 )
 
 func TestCreateTask(t *testing.T) {
 	ms := &MockStore{}
-	service := NewTasksService(ms)
+	service := services.NewTasksService(ms)
 
 	t.Run("should return error if name is empty", func(t *testing.T) {
-		payload := &CreateTaskPayload{
+		payload := &types.CreateTaskPayload{
 			Name: "",
 		}
 
@@ -32,7 +35,7 @@ func TestCreateTask(t *testing.T) {
 		rr := httptest.NewRecorder()
 		router := mux.NewRouter()
 
-		router.HandleFunc("/tasks", service.handleCreateTask)
+		router.HandleFunc("/tasks", service.HandleCreateTask)
 
 		router.ServeHTTP(rr, req)
 
@@ -40,19 +43,19 @@ func TestCreateTask(t *testing.T) {
 			t.Errorf("expected status code %d, got %d", http.StatusBadRequest, rr.Code)
 		}
 
-		var response ErrorResponse
+		var response util.ErrorResponse
 		err = json.NewDecoder(rr.Body).Decode(&response)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if response.Error != errNameRequired.Error() {
-			t.Errorf("expected error message %s, got %s", response.Error, errNameRequired.Error())
+		if response.Error != services.ErrNameRequired.Error() {
+			t.Errorf("expected error message %s, got %s", response.Error, services.ErrNameRequired.Error())
 		}
 	})
 
 	t.Run("should create a task", func(t *testing.T) {
-		payload := &CreateTaskPayload{
+		payload := &types.CreateTaskPayload{
 			Name:         "Creating a REST API in go",
 			ProjectId:    1,
 			AssignedToId: 42,
@@ -71,7 +74,7 @@ func TestCreateTask(t *testing.T) {
 		rr := httptest.NewRecorder()
 		router := mux.NewRouter()
 
-		router.HandleFunc("/tasks", service.handleCreateTask)
+		router.HandleFunc("/tasks", service.HandleCreateTask)
 
 		router.ServeHTTP(rr, req)
 

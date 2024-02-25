@@ -1,18 +1,21 @@
-package main
+package services
 
 import (
 	"encoding/json"
 	"io"
 	"net/http"
 
+	"github.com/abhinavthapa1998/task-manager/internal/store"
+	"github.com/abhinavthapa1998/task-manager/internal/types"
+	"github.com/abhinavthapa1998/task-manager/internal/util"
 	"github.com/gorilla/mux"
 )
 
 type ProjectService struct {
-	store Store
+	store store.Store
 }
 
-func NewProjectService(s Store) *ProjectService {
+func NewProjectService(s store.Store) *ProjectService {
 	return &ProjectService{store: s}
 }
 
@@ -31,25 +34,25 @@ func (s *ProjectService) handleCreateProject(w http.ResponseWriter, r *http.Requ
 
 	defer r.Body.Close()
 
-	var project *Project
+	var project *types.Project
 	err = json.Unmarshal(body, &project)
 	if err != nil {
-		WriteJSON(w, http.StatusBadRequest, ErrorResponse{Error: "Invalid request payload"})
+		util.WriteJSON(w, http.StatusBadRequest, util.ErrorResponse{Error: "Invalid request payload"})
 		return
 	}
 
 	if project.Name == "" {
-		WriteJSON(w, http.StatusBadRequest, ErrorResponse{Error: "Name is required"})
+		util.WriteJSON(w, http.StatusBadRequest, util.ErrorResponse{Error: "Name is required"})
 		return
 	}
 
 	err = s.store.CreateProject(project)
 	if err != nil {
-		WriteJSON(w, http.StatusInternalServerError, ErrorResponse{Error: "Error creating project"})
+		util.WriteJSON(w, http.StatusInternalServerError, util.ErrorResponse{Error: "Error creating project"})
 		return
 	}
 
-	WriteJSON(w, http.StatusCreated, project)
+	util.WriteJSON(w, http.StatusCreated, project)
 }
 
 func (s *ProjectService) handleGetProject(w http.ResponseWriter, r *http.Request) {
@@ -58,11 +61,11 @@ func (s *ProjectService) handleGetProject(w http.ResponseWriter, r *http.Request
 
 	project, err := s.store.GetProject(id)
 	if err != nil {
-		WriteJSON(w, http.StatusInternalServerError, ErrorResponse{Error: "Error getting project"})
+		util.WriteJSON(w, http.StatusInternalServerError, util.ErrorResponse{Error: "Error getting project"})
 		return
 	}
 
-	WriteJSON(w, http.StatusOK, project)
+	util.WriteJSON(w, http.StatusOK, project)
 }
 
 func (s *ProjectService) handleDeleteProject(w http.ResponseWriter, r *http.Request) {
@@ -71,9 +74,9 @@ func (s *ProjectService) handleDeleteProject(w http.ResponseWriter, r *http.Requ
 
 	err := s.store.DeleteProject(id)
 	if err != nil {
-		WriteJSON(w, http.StatusInternalServerError, ErrorResponse{Error: "Error deleting project"})
+		util.WriteJSON(w, http.StatusInternalServerError, util.ErrorResponse{Error: "Error deleting project"})
 		return
 	}
 
-	WriteJSON(w, http.StatusNoContent, nil)
+	util.WriteJSON(w, http.StatusNoContent, nil)
 }

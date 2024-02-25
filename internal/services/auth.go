@@ -1,4 +1,4 @@
-package main
+package services
 
 import (
 	"fmt"
@@ -8,13 +8,15 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/abhinavthapa1998/task-manager/internal/store"
+	"github.com/abhinavthapa1998/task-manager/internal/util"
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func WithJWTAuth(handlerFunc http.HandlerFunc, store Store) http.HandlerFunc {
+func WithJWTAuth(handlerFunc http.HandlerFunc, store store.Store) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		tokenString := GetTokenFromRequest(r)
+		tokenString := util.GetTokenFromRequest(r)
 
 		token, err := validateJWT(tokenString)
 		if err != nil {
@@ -80,7 +82,7 @@ func validateJWT(tokenString string) (*jwt.Token, error) {
 }
 
 func permissionDenied(w http.ResponseWriter) {
-	WriteJSON(w, http.StatusUnauthorized, ErrorResponse{
+	util.WriteJSON(w, http.StatusUnauthorized, util.ErrorResponse{
 		Error: fmt.Errorf("permission denied").Error(),
 	})
 }
