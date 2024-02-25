@@ -9,7 +9,7 @@ type Storage struct {
 type Store interface {
 	// Users
 	CreateUser(u *User) (*User, error)
-	GetUserByID(id string) (*User, error)
+	GetUserById(id string) (*User, error)
 	// Projects
 	CreateProject(p *Project) error
 	GetProject(id string) (*Project, error)
@@ -60,7 +60,7 @@ func (s *Storage) CreateUser(u *User) (*User, error) {
 	return u, nil
 }
 
-func (s *Storage) GetUserByID(id string) (*User, error) {
+func (s *Storage) GetUserById(id string) (*User, error) {
 	var u User
 	err := s.db.QueryRow("SELECT id, email, firstName, lastName, createdAt FROM users WHERE id = ?", id).Scan(&u.Id, &u.Email, &u.FirstName, &u.LastName, &u.CreatedAt)
 	return &u, err
